@@ -24,8 +24,8 @@ def getTests(testsDirectory) -> list:
 def standartizeXML(xml : str) -> str:
     if xml == "":
         return ""
-    parsedXML = minidom.parseString(xml)
-    return parsedXML.toxml()
+    parsedXML = minidom.parseString(xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", ''))
+    return parsedXML.toprettyxml()
 
 def runTest(testDir, interpret, script, testName, timeOut, format):
     print("Running test name: \033[35m{0}\033[0m".format(testName))
@@ -78,9 +78,9 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
 parser = argparse.ArgumentParser(description="Simple tester for Test Driven Developement (TDD)")
 parser.add_argument("program", type=str, help="Tested program that will be runned")
 parser.add_argument("path", type=str, help="Path to folder with test files.")
-parser.add_argument("--timeout", type=int, default=10, help="Maximum amouth of time for program to run. Default=10")
-parser.add_argument("--interpret", type=str, default="", help="Interpreter that runs program. Deafult=Binary file")
-parser.add_argument("--format", type=str, default="plaintext", help="Chose format of output: plaintext xml (Default: plaintext)")
+parser.add_argument("-t", "--timeout", type=int, default=10, help="Maximum amouth of time for program to run. Default=10")
+parser.add_argument("-i", "--interpret", type=str, default="", help="Interpreter that runs program. Deafult=Binary file")
+parser.add_argument("-f", "--format", type=str, default="plaintext", help="Chose format of output: plaintext xml (Default: plaintext)")
 
 args = parser.parse_args()
 
