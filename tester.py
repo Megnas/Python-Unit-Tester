@@ -20,7 +20,7 @@ def getTests(testsDirectory) -> list:
             testNames.append(file)
     return testNames
 
-def runTest(testDir,interpret, script, testName, timeOut):
+def runTest(testDir, interpret, script, testName, timeOut):
     print("Running test name: \033[35m{0}\033[0m".format(testName))
     
     inStr = readFile(testDir + testName + ".src")
@@ -30,7 +30,7 @@ def runTest(testDir,interpret, script, testName, timeOut):
     if interpret == "":
         toRun = ["./{0}".format(script)]
     else:
-        roRun = [interpret, script]
+        toRun = [interpret, script]
 
     proc = Popen(toRun, stdin=PIPE, stderr=PIPE, stdout=PIPE)
     
