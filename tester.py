@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE, TimeoutExpired
+from xml.dom import minidom
 import argparse
 import sys
 import os
@@ -20,7 +21,13 @@ def getTests(testsDirectory) -> list:
             testNames.append(file)
     return testNames
 
-def runTest(testDir, interpret, script, testName, timeOut):
+def standartizeXML(xml : str) -> str:
+    if xml == "":
+        return ""
+    parsedXML = minidom.parseString(xml)
+    return parsedXML.toxml()
+
+def runTest(testDir, interpret, script, testName, timeOut, format):
     print("Running test name: \033[35m{0}\033[0m".format(testName))
     
     inStr = readFile(testDir + testName + ".src")
@@ -55,6 +62,11 @@ def runTest(testDir, interpret, script, testName, timeOut):
         return
     
     correctOut = readFile(testDir + testName + ".out")
+    
+    if format == "xml":
+        correctOut = standartizeXML(correctOut)
+        outStr = standartizeXML(outStr)
+    
     if not correctOut == outStr:
         print("Output of code differs:\n\033[94m{0}\033[0m\nCorrect code:\n\033[94m{1}\033[0m".format(outStr, correctOut))
         print("\033[41mTEST FAILED\033[0m\n")
@@ -68,6 +80,7 @@ parser.add_argument("program", type=str, help="Tested program that will be runne
 parser.add_argument("path", type=str, help="Path to folder with test files.")
 parser.add_argument("--timeout", type=int, default=10, help="Maximum amouth of time for program to run. Default=10")
 parser.add_argument("--interpret", type=str, default="", help="Interpreter that runs program. Deafult=Binary file")
+parser.add_argument("--format", type=str, default="plaintext", help="Chose format of output: plaintext xml (Default: plaintext)")
 
 args = parser.parse_args()
 
@@ -75,9 +88,14 @@ program = args.program
 testsDir = args.path
 timeOut = args.timeout
 interpret = args.interpret
+format = args.format
+
+if not (format == "plaintext" or format == "xml"):
+    sys.stderr.write("Invalid format type\n")
+    exit(1)
 
 tests = getTests(testsDir)
 
 for test in tests:
-    runTest(testsDir,interpret, program, test, timeOut)
+    runTest(testsDir, interpret, program, test, timeOut, format)
 
