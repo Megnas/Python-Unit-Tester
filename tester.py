@@ -27,6 +27,13 @@ def standartizeXML(xml : str) -> str:
     parsedXML = minidom.parseString(xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", ''))
     return parsedXML.toprettyxml()
 
+def standartizeXML_UTF8(xml : str) -> str:
+    if xml == "":
+        return ""
+    parsedXML = minidom.parseString(xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", ''))
+    return parsedXML.toprettyxml(encoding="UTF-8").decode("utf8")
+
+
 def runTest(testDir, interpret, script, testName, timeOut, format):
     print("Running test name: \033[35m{0}\033[0m".format(testName))
     
@@ -66,6 +73,9 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
     if format == "xml":
         correctOut = standartizeXML(correctOut)
         outStr = standartizeXML(outStr)
+    elif format == "xml-utf8":
+        correctOut = standartizeXML_UTF8(correctOut)
+        outStr = standartizeXML_UTF8(outStr)
     
     if not correctOut == outStr:
         print("Output of code differs:\n\033[94m{0}\033[0m\nCorrect code:\n\033[94m{1}\033[0m".format(outStr, correctOut))
@@ -80,7 +90,7 @@ parser.add_argument("program", type=str, help="Tested program that will be runne
 parser.add_argument("path", type=str, help="Path to folder with test files.")
 parser.add_argument("-t", "--timeout", type=int, default=10, help="Maximum amouth of time for program to run. Default=10")
 parser.add_argument("-i", "--interpret", type=str, default="", help="Interpreter that runs program. Deafult=Binary file")
-parser.add_argument("-f", "--format", type=str, default="plaintext", help="Chose format of output: plaintext xml (Default: plaintext)")
+parser.add_argument("-f", "--format", type=str, default="plaintext", help="Chose format of output: plaintext xml xml-utf8 (Default: plaintext)")
 
 args = parser.parse_args()
 
@@ -90,7 +100,7 @@ timeOut = args.timeout
 interpret = args.interpret
 format = args.format
 
-if not (format == "plaintext" or format == "xml"):
+if not (format == "plaintext" or format == "xml" or format == "xml-utf8"):
     sys.stderr.write("Invalid format type\n")
     exit(1)
 
