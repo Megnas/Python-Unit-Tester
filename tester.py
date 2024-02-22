@@ -57,8 +57,8 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
         print("Time out error")
         return
 
-    outStr = outData.decode("ascii")
-    errStr = errData.decode("ascii")
+    outStr = outData.decode("utf8")
+    errStr = errData.decode("utf8")
 
     retCode = int(readFile(testDir + testName + ".rc"))
     if not retCode == proc.returncode:
