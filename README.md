@@ -1,5 +1,5 @@
 # SIMPLE UNIT TESTER
-Siple unit tester made in python for test driven developement
+Simple unit tester made in python for test driven developement
 
 ## Usage
 ```
