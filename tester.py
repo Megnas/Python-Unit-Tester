@@ -62,7 +62,7 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
 
     retCode = int(readFile(testDir + testName + ".rc"))
     if not retCode == proc.returncode:
-        print("Program ended with different exit code than excepted \033[36m{0}\033[0m (Ecpected: \033[36m{1}\033[0m)".format(proc.returncode, retCode))
+        print("Program ended with different exit code than expected \033[36m{0}\033[0m (Expected: \033[36m{1}\033[0m)".format(proc.returncode, retCode))
         print("Source:\n\033[94m{0}\033[0m".format(inStr))
         print("Errors:\n\033[31m{0}\033[0m".format(errStr))
         print("\033[41mTEST FAILED\033[0m\n")
