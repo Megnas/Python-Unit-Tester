@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from subprocess import Popen, PIPE, TimeoutExpired
 from xml.dom import minidom
 import argparse
@@ -24,17 +26,19 @@ def getTests(testsDirectory) -> list:
 def standartizeXML(xml : str) -> str:
     if xml == "":
         return ""
-    parsedXML = minidom.parseString(xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", ''))
+    xml = xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", '')
+    parsedXML = minidom.parseString(xml)
     return parsedXML.toprettyxml()
 
 def standartizeXML_UTF8(xml : str) -> str:
     if xml == "":
         return ""
-    parsedXML = minidom.parseString(xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", ''))
+    xml = xml.replace('\r', '').replace('\n', '').replace('\t', '').replace("    ", '')
+    parsedXML = minidom.parseString(xml)
     return parsedXML.toprettyxml(encoding="UTF-8").decode("utf8")
 
 
-def runTest(testDir, interpret, script, testName, timeOut, format):
+def runTest(testDir, interpret, script, testName, timeOut, format) -> bool:
     print("Running test name: \033[35m{0}\033[0m".format(testName))
     
     inStr = readFile(testDir + testName + ".src")
@@ -55,7 +59,7 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
         outData, errData = proc.communicate(input=(inData), timeout=timeOut)
     except TimeoutExpired:
         print("Time out error")
-        return
+        return False
 
     outStr = outData.decode("utf8")
     errStr = errData.decode("utf8")
@@ -66,23 +70,34 @@ def runTest(testDir, interpret, script, testName, timeOut, format):
         print("Source:\n\033[94m{0}\033[0m".format(inStr))
         print("Errors:\n\033[31m{0}\033[0m".format(errStr))
         print("\033[41mTEST FAILED\033[0m\n")
-        return
+        return False
     
     correctOut = readFile(testDir + testName + ".out")
     
     if format == "xml":
-        correctOut = standartizeXML(correctOut)
-        outStr = standartizeXML(outStr)
+        try:
+            correctOut = standartizeXML(correctOut)
+            outStr = standartizeXML(outStr)
+        except Exception:
+            print("Tester failed to parse XML")
+            print("\033[41mTEST FAILED\033[0m\n")
+            return False
     elif format == "xml-utf8":
-        correctOut = standartizeXML_UTF8(correctOut)
-        outStr = standartizeXML_UTF8(outStr)
+        try:
+            correctOut = standartizeXML_UTF8(correctOut)
+            outStr = standartizeXML_UTF8(outStr)
+        except Exception:
+            print("Tester failed to parse XML")
+            print("\033[41mTEST FAILED\033[0m\n")
+            return False
     
     if not correctOut == outStr:
         print("Output of code differs:\n\033[94m{0}\033[0m\nCorrect code:\n\033[94m{1}\033[0m".format(outStr, correctOut))
         print("\033[41mTEST FAILED\033[0m\n")
-        return
+        return False
 
     print("\033[42mTEST PASSED\033[0m\n")
+    return True
 
 
 parser = argparse.ArgumentParser(description="Simple tester for Test Driven Developement (TDD)")
@@ -106,6 +121,16 @@ if not (format == "plaintext" or format == "xml" or format == "xml-utf8"):
 
 tests = getTests(testsDir)
 
-for test in tests:
-    runTest(testsDir, interpret, program, test, timeOut, format)
+passed = 0
+failed = 0
 
+for test in tests:
+    if runTest(testsDir, interpret, program, test, timeOut, format):
+        passed += 1
+    else:
+        failed += 1
+
+if failed == 0:
+    print("All tests passed \033[42mSUCCESSFULLY\033[0m\n")
+else:
+    print("{0}/{1} tests passed".format(passed, passed + failed))
